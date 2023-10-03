@@ -6,6 +6,8 @@ import sqlite3
 from datetime import datetime
 import sys
 
+# dodat opciju za promjenit broj kcal
+
 
 class DietingApp(QMainWindow):
     def __init__(self):
@@ -25,80 +27,22 @@ class DietingApp(QMainWindow):
 
         self.grid = QGridLayout(self.central_widget)
 
-        self.label = QLabel(self.central_widget)
-        self.label.setText('Dieting app')
-        self.label.setStyleSheet('color: 000000;' + "font-size: 50px")
-        self.label.setAlignment(QtCore.Qt.AlignCenter)
-        self.grid.addWidget(self.label, 0, 1)
+        self.grid.addWidget(MainLabel('Dieting app'), 0, 1)
 
-        self.food_button = QPushButton('new entry')
-        self.food_button.setStyleSheet("*{border: 4px solid '#000000';" +
-                                       "border-radius: 45px;" +
-                                       "font-size: 35px;" +
-                                       "color: '#000000';" +
-                                       "background: '#08fff0';" +
-                                       "padding: 25px;}" +
-                                       "*:hover{background: '#f8ff08';}"
-                                       )
-        self.food_button.setCursor(
-            QCursor(QtCore.Qt.PointingHandCursor))
-        self.food_button.clicked.connect(self.new_entry)
+        self.food_button = PushButton('new entry', self.new_entry)
         self.grid.addWidget(self.food_button, 1, 0)
 
-        self.macros_button = QPushButton('macros window')
-        self.macros_button.setStyleSheet("*{border: 4px solid '#000000';" +
-                                         "border-radius: 45px;" +
-                                         "font-size: 35px;" +
-                                         "color: '#000000';" +
-                                         "background: '#08fff0';" +
-                                         "padding: 25px;}" +
-                                         "*:hover{background: '#f8ff08';}"
-                                         )
-        self.macros_button.setCursor(
-            QCursor(QtCore.Qt.PointingHandCursor))
-        self.macros_button.clicked.connect(self.macros_window)
+        self.macros_button = PushButton('macros window', self.macros_window)
         self.grid.addWidget(self.macros_button, 1, 1)
 
-        self.new_food_button = QPushButton('new food type')
-        self.new_food_button.setStyleSheet("*{border: 4px solid '#000000';" +
-                                           "border-radius: 45px;" +
-                                           "font-size: 35px;" +
-                                           "color: '#000000';" +
-                                           "background: '#08fff0';" +
-                                           "padding: 25px;}" +
-                                           "*:hover{background: '#f8ff08';}"
-                                           )
-        self.new_food_button.setCursor(
-            QCursor(QtCore.Qt.PointingHandCursor))
-        self.new_food_button.clicked.connect(self.new_food_type)
+        self.new_food_button = PushButton('new food type', self.new_food_type)
         self.grid.addWidget(self.new_food_button, 1, 2)
 
-        self.look_up_button = QPushButton('search database')
-        self.look_up_button.setStyleSheet("*{border: 4px solid '#000000';" +
-                                          "border-radius: 45px;" +
-                                          "font-size: 35px;" +
-                                          "color: '#000000';" +
-                                          "background: '#08fff0';" +
-                                          "padding: 25px;}" +
-                                          "*:hover{background: '#f8ff08';}"
-                                          )
-        self.look_up_button.setCursor(
-            QCursor(QtCore.Qt.PointingHandCursor))
-        self.look_up_button.clicked.connect(self.look_up_window)
+        self.look_up_button = PushButton(
+            'search database', self.look_up_window)
         self.grid.addWidget(self.look_up_button, 2, 0)
 
-        self.close_app_button = QPushButton('close app')
-        self.close_app_button.setStyleSheet("*{border: 4px solid '#000000';" +
-                                            "border-radius: 45px;" +
-                                            "font-size: 35px;" +
-                                            "color: '#000000';" +
-                                            "background: '#08fff0';" +
-                                            "padding: 25px;}" +
-                                            "*:hover{background: '#f8ff08';}"
-                                            )
-        self.close_app_button.setCursor(
-            QCursor(QtCore.Qt.PointingHandCursor))
-        self.close_app_button.clicked.connect(self.close_app)
+        self.close_app_button = PushButton('close app', self.close_app)
         self.grid.addWidget(self.close_app_button, 2, 2)
 
     def new_entry(self):
@@ -138,167 +82,60 @@ class NewEntry(QWidget):
         self.grid.addWidget(self.frame_1, 1, 0)
         self.grid_1 = QGridLayout(self.frame_1)
 
-        self.food_name_label = QLabel(self.frame_1)
-        self.food_name_label.setText('food name')
-        self.food_name_label.setStyleSheet(
-            'color: 000000;' + "font-size: 25px")
-        self.food_name_label.setAlignment(QtCore.Qt.AlignCenter)
+        self.food_name_label = Label('food name')
         self.grid_1.addWidget(self.food_name_label, 0, 0)
 
-        self.food_name_edit = QLineEdit(self.frame_1)
-        self.food_name_edit.setStyleSheet("*{border: 4px solid '#000000';" +
-                                          "border-radius: 45px;" +
-                                          "font-size: 25px;" +
-                                          "padding: 0 25px;" +
-                                          "color: '#000000';}")
-        self.food_name_edit.setFocus()
+        self.food_name_edit = UserLineEdit(True)
         self.grid_1.addWidget(self.food_name_edit, 1, 0)
 
-        self.food_quantity_label = QLabel(self.frame_1)
-        self.food_quantity_label.setText('food quantity (g)')
-        self.food_quantity_label.setStyleSheet(
-            'color: 000000;' + "font-size: 25px")
-        self.food_quantity_label.setAlignment(QtCore.Qt.AlignCenter)
+        self.food_quantity_label = Label('food quantity (g)')
         self.grid_1.addWidget(self.food_quantity_label, 2, 0)
 
-        self.food_quantity_edit = QLineEdit(self.frame_1)
-        self.food_quantity_edit.setStyleSheet("*{border: 4px solid '#000000';" +
-                                              "border-radius: 45px;" +
-                                              "font-size: 25px;" +
-                                              "padding: 0 25px;" +
-                                              "color: '#000000';}")
+        self.food_quantity_edit = UserLineEdit()
         self.grid_1.addWidget(self.food_quantity_edit, 3, 0)
 
-        self.add_button = QPushButton('add a food')
-        self.add_button.setStyleSheet("*{border: 4px solid '#000000';" +
-                                      "border-radius: 20px;" +
-                                      "font-size: 20px;" +
-                                      "color: '#000000';" +
-                                      "background: '#08fff0';" +
-                                      "padding: 25px;}" +
-                                      "*:hover{background: '#f8ff08';}"
-                                      )
-        self.add_button.clicked.connect(self.add_food)
-        self.add_button.setCursor(
-            QCursor(QtCore.Qt.PointingHandCursor))
+        self.add_button = PushButton('add a food', self.add_food)
         self.grid_1.addWidget(self.add_button, 0, 1)
 
-        self.remove_button = QPushButton('remove a food')
-        self.remove_button.setStyleSheet("*{border: 4px solid '#000000';" +
-                                         "border-radius: 20px;" +
-                                         "font-size: 20px;" +
-                                         "color: '#000000';" +
-                                         "background: '#08fff0';" +
-                                         "padding: 25px;}" +
-                                         "*:hover{background: '#f8ff08';}"
-                                         )
-        self.remove_button.clicked.connect(self.remove_food)
-        self.remove_button.setCursor(
-            QCursor(QtCore.Qt.PointingHandCursor))
-
+        self.remove_button = PushButton('remove a food', self.remove_food)
         self.grid_1.addWidget(self.remove_button, 1, 1)
 
-        self.clear_button = QPushButton('clear plan')
-        self.clear_button.setStyleSheet("*{border: 4px solid '#000000';" +
-                                        "border-radius: 20px;" +
-                                        "font-size: 20px;" +
-                                        "color: '#000000';" +
-                                        "background: '#08fff0';" +
-                                        "padding: 25px;}" +
-                                        "*:hover{background: '#f8ff08';}"
-                                        )
-        self.clear_button.clicked.connect(self.clear_plan)
-        self.clear_button.setCursor(
-            QCursor(QtCore.Qt.PointingHandCursor))
+        self.clear_button = PushButton('clear plan', self.clear_plan)
         self.grid_1.addWidget(self.clear_button, 2, 1)
 
-        self.select_button = QPushButton('select a food')
-        self.select_button.setStyleSheet("*{border: 4px solid '#000000';" +
-                                         "border-radius: 20px;" +
-                                         "font-size: 20px;" +
-                                         "color: '#000000';" +
-                                         "background: '#08fff0';" +
-                                         "padding: 25px;}" +
-                                         "*:hover{background: '#f8ff08';}"
-                                         )
-        self.select_button.clicked.connect(self.select_food)
-        self.select_button.setCursor(
-            QCursor(QtCore.Qt.PointingHandCursor))
+        self.select_button = PushButton('select a food', self.select_food)
         self.grid_1.addWidget(self.select_button, 3, 1)
 
-        self.close_button = QPushButton('close window')
-        self.close_button.setStyleSheet("*{border: 4px solid '#000000';" +
-                                        "border-radius: 20px;" +
-                                        "font-size: 20px;" +
-                                        "color: '#000000';" +
-                                        "background: '#08fff0';" +
-                                        "padding: 25px;}" +
-                                        "*:hover{background: '#f8ff08';}"
-                                        )
-        self.close_button.clicked.connect(self.close)
-        self.close_button.setCursor(
-            QCursor(QtCore.Qt.PointingHandCursor))
+        self.close_button = PushButton('close window', self.close)
         self.grid_1.addWidget(self.close_button, 4, 1)
 
         self.frame_2 = QFrame(self)
         self.grid.addWidget(self.frame_2, 0, 0)
         self.grid_2 = QGridLayout(self.frame_2)
 
-        self.total_label = QLabel(self.frame_2)
-        self.total_label.setText('total calories')
-        self.total_label.setStyleSheet(
-            'color: 000000;' + "font-size: 25px")
-        self.total_label.setAlignment(QtCore.Qt.AlignCenter)
+        self.total_label = Label('total calories')
         self.grid_2.addWidget(self.total_label, 1, 0)
 
-        self.protein_label = QLabel(self.frame_2)
-        self.protein_label.setText('total protein')
-        self.protein_label.setStyleSheet(
-            'color: 000000;' + "font-size: 25px")
-        self.protein_label.setAlignment(QtCore.Qt.AlignCenter)
+        self.protein_label = Label('total protein')
         self.grid_2.addWidget(self.protein_label, 2, 0)
 
-        self.fat_label = QLabel(self.frame_2)
-        self.fat_label.setText('total fat')
-        self.fat_label.setStyleSheet(
-            'color: 000000;' + "font-size: 25px")
-        self.fat_label.setAlignment(QtCore.Qt.AlignCenter)
+        self.fat_label = Label('total fat')
         self.grid_2.addWidget(self.fat_label, 3, 0)
 
-        self.carbohydrates_label = QLabel(self.frame_2)
-        self.carbohydrates_label.setText('total carbohydrates')
-        self.carbohydrates_label.setStyleSheet(
-            'color: 000000;' + "font-size: 25px")
-        self.carbohydrates_label.setAlignment(QtCore.Qt.AlignCenter)
+        self.carbohydrates_label = Label('total carbohydrates')
         self.grid_2.addWidget(self.carbohydrates_label, 4, 0)
 
         self.gs = 'g'
-        self.num_total_label = QLabel(self.frame_2)
-        self.num_total_label.setText('0 kcal')
-        self.num_total_label.setStyleSheet(
-            'color: 000000;' + "font-size: 25px")
-        self.num_total_label.setAlignment(QtCore.Qt.AlignCenter)
+        self.num_total_label = Label('0 kcal')
         self.grid_2.addWidget(self.num_total_label, 1, 1)
 
-        self.num_protein_label = QLabel(self.frame_2)
-        self.num_protein_label.setText(f'0 {self.gs}')
-        self.num_protein_label.setStyleSheet(
-            'color: 000000;' + "font-size: 25px")
-        self.num_protein_label.setAlignment(QtCore.Qt.AlignCenter)
+        self.num_protein_label = Label(f'0 {self.gs}')
         self.grid_2.addWidget(self.num_protein_label, 2, 1)
 
-        self.num_fat_label = QLabel(self.frame_2)
-        self.num_fat_label.setText(f'0 {self.gs}')
-        self.num_fat_label.setStyleSheet(
-            'color: 000000;' + "font-size: 25px")
-        self.num_fat_label.setAlignment(QtCore.Qt.AlignCenter)
+        self.num_fat_label = Label('0 {self.gs}')
         self.grid_2.addWidget(self.num_fat_label, 3, 1)
 
-        self.num_carbohydrates_label = QLabel(self.frame_2)
-        self.num_carbohydrates_label.setText(f'0 {self.gs}')
-        self.num_carbohydrates_label.setStyleSheet(
-            'color: 000000;' + "font-size: 25px")
-        self.num_carbohydrates_label.setAlignment(QtCore.Qt.AlignCenter)
+        self.num_carbohydrates_label = Label(f'0 {self.gs}')
         self.grid_2.addWidget(self.num_carbohydrates_label, 4, 1)
 
         try:
@@ -414,10 +251,7 @@ class SelectFood(QWidget):
 
         self.get_foods()
 
-        self.label = QLabel(self)
-        self.label.setText('Search for food: ')
-        self.label.setStyleSheet(
-            'color: 000000;' + "font-size: 25px")
+        self.label = Label('Search for food: ')
         self.grid.addWidget(self.label, self.row + 1, 0)
 
         self.edit = TextEdit(self)
@@ -436,17 +270,8 @@ class SelectFood(QWidget):
         self.row = 0
         column = 0
         for food in foods:
-            button = QPushButton(f'{food}')
-            button.setStyleSheet("*{border: 2px solid '#000000';" +
-                                 "border-radius: 20px;" +
-                                 "font-size: 20px;" +
-                                 "color: '#000000';" +
-                                 "background: '#08fff0';" +
-                                 "padding: 25px;}" +
-                                 "*:hover{background: '#f8ff08';}"
-                                 )
+            button = PushButton(f'{food}', self.add_text)
             self.buttons.append(button)
-            button.clicked.connect(self.add_text)
             self.grid.addWidget(button, self.row, column)
             column += 1
             if column != 0:
@@ -474,8 +299,8 @@ class TextEdit(QLineEdit):
             try:
                 d.new_window.select.edit.setText(
                     d.new_window.select.edit.text()[:-1])
-                d.new_window.select.show_buttons()
                 d.new_window.select.filter_foods()
+                d.new_window.select.show_buttons()
             except IndexError:
                 pass
         super(TextEdit, self).keyPressEvent(event)
@@ -495,67 +320,31 @@ class Macros(QWidget):
 
         self.grid_1 = QGridLayout(self.frame_1)
 
-        self.main_label = QLabel(self.frame_1)
-        self.main_label.setText('macros distribution')
-        self.main_label.setStyleSheet(
-            'color: 000000;' + "font-size: 40px")
-        self.main_label.setAlignment(QtCore.Qt.AlignCenter)
+        self.main_label = MainLabel('macros distribution')
         self.grid_1.addWidget(self.main_label, 0, 0, 1, 2)
 
-        self.total_label = QLabel(self.frame_1)
-        self.total_label.setText('perc total')
-        self.total_label.setStyleSheet(
-            'color: 000000;' + "font-size: 25px")
-        self.total_label.setAlignment(QtCore.Qt.AlignCenter)
+        self.total_label = Label('perc total')
         self.grid_1.addWidget(self.total_label, 1, 0)
 
-        self.protein_label = QLabel(self.frame_1)
-        self.protein_label.setText('perc protein')
-        self.protein_label.setStyleSheet(
-            'color: 000000;' + "font-size: 25px")
-        self.protein_label.setAlignment(QtCore.Qt.AlignCenter)
+        self.protein_label = Label('perc protein')
         self.grid_1.addWidget(self.protein_label, 2, 0)
 
-        self.fat_label = QLabel(self.frame_1)
-        self.fat_label.setText('perc fat')
-        self.fat_label.setStyleSheet(
-            'color: 000000;' + "font-size: 25px")
-        self.fat_label.setAlignment(QtCore.Qt.AlignCenter)
+        self.fat_label = Label('perc fat')
         self.grid_1.addWidget(self.fat_label, 3, 0)
 
-        self.carbohydrates_label = QLabel(self.frame_1)
-        self.carbohydrates_label.setText('perc carbohydrates')
-        self.carbohydrates_label.setStyleSheet(
-            'color: 000000;' + "font-size: 25px")
-        self.carbohydrates_label.setAlignment(QtCore.Qt.AlignCenter)
+        self.carbohydrates_label = Label('perc carbohydrates')
         self.grid_1.addWidget(self.carbohydrates_label, 4, 0)
 
-        self.perc_total_label = QLabel(self.frame_1)
-        self.perc_total_label.setText('0 %')
-        self.perc_total_label.setStyleSheet(
-            'color: 000000;' + "font-size: 25px")
-        self.perc_total_label.setAlignment(QtCore.Qt.AlignCenter)
+        self.perc_total_label = Label('0 %')
         self.grid_1.addWidget(self.perc_total_label, 1, 1)
 
-        self.perc_protein_label = QLabel(self.frame_1)
-        self.perc_protein_label.setText('0 %')
-        self.perc_protein_label.setStyleSheet(
-            'color: 000000;' + "font-size: 25px")
-        self.perc_protein_label.setAlignment(QtCore.Qt.AlignCenter)
+        self.perc_protein_label = Label('0 %')
         self.grid_1.addWidget(self.perc_protein_label, 2, 1)
 
-        self.perc_fat_label = QLabel(self.frame_1)
-        self.perc_fat_label.setText('0 %')
-        self.perc_fat_label.setStyleSheet(
-            'color: 000000;' + "font-size: 25px")
-        self.perc_fat_label.setAlignment(QtCore.Qt.AlignCenter)
+        self.perc_fat_label = Label('0 %')
         self.grid_1.addWidget(self.perc_fat_label, 3, 1)
 
-        self.perc_carbohydrates_label = QLabel(self.frame_1)
-        self.perc_carbohydrates_label.setText('0 %')
-        self.perc_carbohydrates_label.setStyleSheet(
-            'color: 000000;' + "font-size: 25px")
-        self.perc_carbohydrates_label.setAlignment(QtCore.Qt.AlignCenter)
+        self.perc_carbohydrates_label = Label('0 %')
         self.grid_1.addWidget(self.perc_carbohydrates_label, 4, 1)
 
         self.frame_2 = QFrame(self)
@@ -563,18 +352,7 @@ class Macros(QWidget):
         self.grid.addWidget(self.frame_2, 1, 0)
         self.grid_2 = QGridLayout(self.frame_2)
 
-        self.close_button = QPushButton('close window')
-        self.close_button.setStyleSheet("*{border: 4px solid '#000000';" +
-                                        "border-radius: 20px;" +
-                                        "font-size: 20px;" +
-                                        "color: '#000000';" +
-                                        "background: '#08fff0';" +
-                                        "padding: 25px;}" +
-                                        "*:hover{background: '#f8ff08';}"
-                                        )
-        self.close_button.clicked.connect(self.close)
-        self.close_button.setCursor(
-            QCursor(QtCore.Qt.PointingHandCursor))
+        self.close_button = PushButton('close window', self.close)
         self.close_button.setMaximumWidth(250)
         self.grid_2.addWidget(self.close_button, 5, 1)
 
@@ -620,108 +398,40 @@ class NewFood(QWidget):
 
         self.grid = QGridLayout(self)
 
-        self.name_label = QLabel(self)
-        self.name_label.setText('food name')
-        self.name_label.setStyleSheet(
-            'color: 000000;' + "font-size: 25px")
-        self.name_label.setAlignment(QtCore.Qt.AlignCenter)
+        self.name_label = Label('food name')
         self.grid.addWidget(self.name_label, 0, 0)
 
-        self.total_label = QLabel(self)
-        self.total_label.setText('calories')
-        self.total_label.setStyleSheet(
-            'color: 000000;' + "font-size: 25px")
-        self.total_label.setAlignment(QtCore.Qt.AlignCenter)
+        self.total_label = Label('calories')
         self.grid.addWidget(self.total_label, 1, 0)
 
-        self.protein_label = QLabel(self)
-        self.protein_label.setText('protein')
-        self.protein_label.setStyleSheet(
-            'color: 000000;' + "font-size: 25px")
-        self.protein_label.setAlignment(QtCore.Qt.AlignCenter)
+        self.protein_label = Label('protein')
         self.grid.addWidget(self.protein_label, 2, 0)
 
-        self.fat_label = QLabel(self)
-        self.fat_label.setText('fat')
-        self.fat_label.setStyleSheet(
-            'color: 000000;' + "font-size: 25px")
-        self.fat_label.setAlignment(QtCore.Qt.AlignCenter)
+        self.fat_label = Label('fat')
         self.grid.addWidget(self.fat_label, 3, 0)
 
-        self.carbohydrates_label = QLabel(self)
-        self.carbohydrates_label.setText('carbohydrates')
-        self.carbohydrates_label.setStyleSheet(
-            'color: 000000;' + "font-size: 25px")
-        self.carbohydrates_label.setAlignment(QtCore.Qt.AlignCenter)
+        self.carbohydrates_label = Label('carbohydrates')
         self.grid.addWidget(self.carbohydrates_label, 4, 0)
 
-        self.food_name_edit = QLineEdit(self)
-        self.food_name_edit.setStyleSheet("*{border: 4px solid '#000000';" +
-                                          "border-radius: 45px;" +
-                                          "font-size: 25px;" +
-                                          "padding: 0 25px;" +
-                                          "color: '#000000';}")
-        self.food_name_edit.setFocus()
+        self.food_name_edit = UserLineEdit(self)
         self.grid.addWidget(self.food_name_edit, 0, 1)
 
-        self.calories_edit = QLineEdit(self)
-        self.calories_edit.setStyleSheet("*{border: 4px solid '#000000';" +
-                                         "border-radius: 45px;" +
-                                         "font-size: 25px;" +
-                                         "padding: 0 25px;" +
-                                         "color: '#000000';}")
+        self.calories_edit = UserLineEdit(self)
         self.grid.addWidget(self.calories_edit, 1, 1)
 
-        self.protein_edit = QLineEdit(self)
-        self.protein_edit.setStyleSheet("*{border: 4px solid '#000000';" +
-                                        "border-radius: 45px;" +
-                                        "font-size: 25px;" +
-                                        "padding: 0 25px;" +
-                                        "color: '#000000';}")
+        self.protein_edit = UserLineEdit(self)
         self.grid.addWidget(self.protein_edit, 2, 1)
 
-        self.fat_edit = QLineEdit(self)
-        self.fat_edit.setStyleSheet("*{border: 4px solid '#000000';" +
-                                    "border-radius: 45px;" +
-                                    "font-size: 25px;" +
-                                    "padding: 0 25px;" +
-                                    "color: '#000000';}")
+        self.fat_edit = UserLineEdit()
         self.grid.addWidget(self.fat_edit, 3, 1)
 
-        self.carbohydrates_edit = QLineEdit(self)
-        self.carbohydrates_edit.setStyleSheet("*{border: 4px solid '#000000';" +
-                                              "border-radius: 45px;" +
-                                              "font-size: 25px;" +
-                                              "padding: 0 25px;" +
-                                              "color: '#000000';}")
+        self.carbohydrates_edit = UserLineEdit()
         self.grid.addWidget(self.carbohydrates_edit, 4, 1)
 
-        self.insert_button = QPushButton('insert food')
-        self.insert_button.setStyleSheet("*{border: 4px solid '#000000';" +
-                                         "border-radius: 20px;" +
-                                         "font-size: 20px;" +
-                                         "color: '#000000';" +
-                                         "background: '#08fff0';" +
-                                         "padding: 25px;}" +
-                                         "*:hover{background: '#f8ff08';}"
-                                         )
-        self.insert_button.clicked.connect(self.insert_food)
-        self.insert_button.setCursor(
-            QCursor(QtCore.Qt.PointingHandCursor))
+        self.insert_button = PushButton('insert food', self.insert_food)
         self.grid.addWidget(self.insert_button, 5, 0)
 
-        self.close_button = QPushButton('close window')
-        self.close_button.setStyleSheet("*{border: 4px solid '#000000';" +
-                                        "border-radius: 20px;" +
-                                        "font-size: 20px;" +
-                                        "color: '#000000';" +
-                                        "background: '#08fff0';" +
-                                        "padding: 25px;}" +
-                                        "*:hover{background: '#f8ff08';}"
-                                        )
-        self.close_button.clicked.connect(self.close)
-        self.close_button.setCursor(
-            QCursor(QtCore.Qt.PointingHandCursor))
+        self.close_button = PushButton('close window', self.close)
         self.grid.addWidget(self.close_button, 5, 1)
 
         [item.setMaximumWidth(250)
@@ -780,83 +490,35 @@ class LookUpWindow(QWidget):
 
         self.grid_1 = QGridLayout(self.frame_1)
 
-        self.total_label = QLabel(self.frame_1)
-        self.total_label.setText('calories')
-        self.total_label.setStyleSheet(
-            'color: 000000;' + "font-size: 25px")
-        self.total_label.setAlignment(QtCore.Qt.AlignCenter)
+        self.total_label = Label('calories')
         self.grid_1.addWidget(self.total_label, 0, 0)
 
-        self.protein_label = QLabel(self.frame_1)
-        self.protein_label.setText('protein')
-        self.protein_label.setStyleSheet(
-            'color: 000000;' + "font-size: 25px")
-        self.protein_label.setAlignment(QtCore.Qt.AlignCenter)
+        self.protein_label = Label('protein')
         self.grid_1.addWidget(self.protein_label, 1, 0)
 
-        self.fat_label = QLabel(self.frame_1)
-        self.fat_label.setText('fat')
-        self.fat_label.setStyleSheet(
-            'color: 000000;' + "font-size: 25px")
-        self.fat_label.setAlignment(QtCore.Qt.AlignCenter)
+        self.fat_label = Label('fat')
         self.grid_1.addWidget(self.fat_label, 2, 0)
 
-        self.carbohydrates_label = QLabel(self.frame_1)
-        self.carbohydrates_label.setText('carbohydrates')
-        self.carbohydrates_label.setStyleSheet(
-            'color: 000000;' + "font-size: 25px")
-        self.carbohydrates_label.setAlignment(QtCore.Qt.AlignCenter)
+        self.carbohydrates_label = Label('carbohydrates')
         self.grid_1.addWidget(self.carbohydrates_label, 3, 0)
 
-        self.total_kcal_label = QLabel(self.frame_1)
-        self.total_kcal_label.setText('0 g')
-        self.total_kcal_label.setStyleSheet(
-            'color: 000000;' + "font-size: 25px")
-        self.total_kcal_label.setAlignment(QtCore.Qt.AlignCenter)
+        self.total_kcal_label = Label('0 g')
         self.grid_1.addWidget(self.total_kcal_label, 0, 1)
 
-        self.protein_g_label = QLabel(self.frame_1)
-        self.protein_g_label.setText('0 g')
-        self.protein_g_label.setStyleSheet(
-            'color: 000000;' + "font-size: 25px")
-        self.protein_g_label.setAlignment(QtCore.Qt.AlignCenter)
+        self.protein_g_label = Label('0 g')
         self.grid_1.addWidget(self.protein_g_label, 1, 1)
 
-        self.fat_g_label = QLabel(self.frame_1)
-        self.fat_g_label.setText('0 g')
-        self.fat_g_label.setStyleSheet(
-            'color: 000000;' + "font-size: 25px")
-        self.fat_g_label.setAlignment(QtCore.Qt.AlignCenter)
+        self.fat_g_label = Label('0 g')
         self.grid_1.addWidget(self.fat_g_label, 2, 1)
 
-        self.carbohydrates_g_label = QLabel(self.frame_1)
-        self.carbohydrates_g_label.setText('0 g')
-        self.carbohydrates_g_label.setStyleSheet(
-            'color: 000000;' + "font-size: 25px")
-        self.carbohydrates_g_label.setAlignment(QtCore.Qt.AlignCenter)
-        self.grid_1.addWidget(self.carbohydrates_g_label, 3, 1)
+        self.carbohydrates_g_label = Label('0 g')
+        self.grid_1.addWikdget(self.carbohydrates_g_label, 3, 1)
 
-        self.name_edit = QLineEdit(self)
-        self.name_edit.setStyleSheet("*{border: 4px solid '#000000';" +
-                                     "border-radius: 45px;" +
-                                     "font-size: 25px;" +
-                                     "padding: 0 25px;" +
-                                     "color: '#000000';}")
-        self.name_edit.setMaximumWidth(250)
+        self.name_edit = UserLineEdit(width=250)
         self.grid_1.addWidget(self.name_edit, 4, 0)
 
-        self.close_button = QPushButton('search database')
-        self.close_button.setStyleSheet("*{border: 4px solid '#000000';" +
-                                        "border-radius: 20px;" +
-                                        "font-size: 20px;" +
-                                        "color: '#000000';" +
-                                        "background: '#08fff0';" +
-                                        "padding: 25px;}" +
-                                        "*:hover{background: '#f8ff08';}"
-                                        )
-        self.close_button.clicked.connect(self.calculate_macros)
-        self.close_button.setCursor(
-            QCursor(QtCore.Qt.PointingHandCursor))
+        self.close_button = QPushButton(
+            'search database', self.calculate_macros)
         self.grid_1.addWidget(self.close_button, 4, 1)
 
         self.frame_2 = QFrame(self)
@@ -864,18 +526,7 @@ class LookUpWindow(QWidget):
         self.grid.addWidget(self.frame_2, 1, 0)
         self.grid_2 = QGridLayout(self.frame_2)
 
-        self.close_button = QPushButton('close window')
-        self.close_button.setStyleSheet("*{border: 4px solid '#000000';" +
-                                        "border-radius: 20px;" +
-                                        "font-size: 20px;" +
-                                        "color: '#000000';" +
-                                        "background: '#08fff0';" +
-                                        "padding: 25px;}" +
-                                        "*:hover{background: '#f8ff08';}"
-                                        )
-        self.close_button.clicked.connect(self.close)
-        self.close_button.setCursor(
-            QCursor(QtCore.Qt.PointingHandCursor))
+        self.close_button = PushButton('close window', self.close)
         self.grid_2.addWidget(self.close_button, 5, 1)
 
         [item.setMaximumWidth(250) for item in (
@@ -898,6 +549,54 @@ class LookUpWindow(QWidget):
         self.fat_g_label.setText(f'{macros[0][3]} g')
 
         self.carbohydrates_g_label.setText(f'{macros[0][4]} g')
+
+
+class Label(QLabel):
+    def __init__(self, text):
+        super().__init__()
+        self.setText(text)
+        self.setStyleSheet('color: 000000;' + "font-size: 25px")
+        self.setAlignment(QtCore.Qt.AlignCenter)
+
+
+class MainLabel(QLabel):
+    def __init__(self, text):
+        super().__init__()
+        self.setText(text)
+        self.setStyleSheet('color: 000000;' + "font-size: 50px")
+        self.setAlignment(QtCore.Qt.AlignCenter)
+
+
+class PushButton(QPushButton):
+    def __init__(self, text, function):
+        super().__init__()
+        self.setText(text)
+        self.setStyleSheet("*{border: 4px solid '#000000';" +
+                           "border-radius: 45px;" +
+                           "font-size: 35px;" +
+                           "color: '#000000';" +
+                           "background: '#08fff0';" +
+                           "padding: 25px;}" +
+                           "*:hover{background: '#f8ff08';}"
+                           )
+        self.setCursor(
+            QCursor(QtCore.Qt.PointingHandCursor))
+        self.clicked.connect(function)
+
+
+class UserLineEdit(QLineEdit):
+    def __init__(self, focus=False, width=False):
+        super().__init__()
+        self.setStyleSheet("*{border: 4px solid '#000000';" +
+                           "border-radius: 45px;" +
+                           "font-size: 25px;" +
+                           "padding: 0 25px;" +
+                           "color: '#000000';}")
+        if focus:
+            self.setFocus()
+
+        if width:
+            self.setMaximumWidth(width)
 
 
 if __name__ == '__main__':
