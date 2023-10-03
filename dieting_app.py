@@ -5,8 +5,16 @@ from sqlite3 import IntegrityError, OperationalError
 import sqlite3
 from datetime import datetime
 import sys
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
+from matplotlib.figure import Figure
+import matplotlib.pyplot as plt
+import matplotlib
+import numpy as np
 
 # dodat opciju za promjenit broj kcal
+# dodat opciju za remove food
+
+matplotlib.use('Qt5Agg')
 
 
 class DietingApp(QMainWindow):
@@ -38,12 +46,8 @@ class DietingApp(QMainWindow):
         self.new_food_button = PushButton('new food type', self.new_food_type)
         self.grid.addWidget(self.new_food_button, 1, 2)
 
-        self.look_up_button = PushButton(
-            'search database', self.look_up_window)
-        self.grid.addWidget(self.look_up_button, 2, 0)
-
         self.close_app_button = PushButton('close app', self.close_app)
-        self.grid.addWidget(self.close_app_button, 2, 2)
+        self.grid.addWidget(self.close_app_button, 2, 1)
 
     def new_entry(self):
         self.new_window = NewEntry()
@@ -57,10 +61,6 @@ class DietingApp(QMainWindow):
         self.new_window = NewFood()
         self.new_window.show()
 
-    def look_up_window(self):
-        self.new_window = LookUpWindow()
-        self.new_window.show()
-
     def close_app(self):
         try:
             self.new_window.close()
@@ -72,7 +72,7 @@ class DietingApp(QMainWindow):
 class NewEntry(QWidget):
     def __init__(self):
         super().__init__()
-        self.setGeometry(0, 0, 600, 400)
+        self.setGeometry(0, 0, 800, 700)
         self.setWindowTitle('Food entry')
         self.setStyleSheet('background: #ffffff')
 
@@ -143,7 +143,7 @@ class NewEntry(QWidget):
         except OperationalError:
             pass
 
-        [item.setMaximumWidth(200) for item in self.frame_1.children() if type(
+        [item.setMaximumWidth(250) for item in self.frame_1.children() if type(
             item) != QGridLayout]
 
     def insert_data(self):
@@ -293,29 +293,17 @@ class SelectFood(QWidget):
         [button.show() for button in self.buttons]
 
 
-class TextEdit(QLineEdit):
-    def keyPressEvent(self, event):
-        if event.key() == QtCore.Qt.Key_Backspace:
-            try:
-                d.new_window.select.edit.setText(
-                    d.new_window.select.edit.text()[:-1])
-                d.new_window.select.filter_foods()
-                d.new_window.select.show_buttons()
-            except IndexError:
-                pass
-        super(TextEdit, self).keyPressEvent(event)
-
-
 class Macros(QWidget):
     def __init__(self):
         super().__init__()
-        self.setGeometry(0, 0, 700, 700)
+        self.setGeometry(0, 0, 800, 800)
         self.setWindowTitle('Macros window')
         self.setStyleSheet('background: #ffffff')
 
         self.grid = QGridLayout(self)
 
         self.frame_1 = QFrame(self)
+        self.frame_1.setMinimumHeight(300)
         self.grid.addWidget(self.frame_1)
 
         self.grid_1 = QGridLayout(self.frame_1)
@@ -323,43 +311,33 @@ class Macros(QWidget):
         self.main_label = MainLabel('macros distribution')
         self.grid_1.addWidget(self.main_label, 0, 0, 1, 2)
 
-        self.total_label = Label('perc total')
+        self.total_label = Label('Num of calories')
         self.grid_1.addWidget(self.total_label, 1, 0)
 
-        self.protein_label = Label('perc protein')
+        self.protein_label = Label('Num of protein')
         self.grid_1.addWidget(self.protein_label, 2, 0)
 
-        self.fat_label = Label('perc fat')
-        self.grid_1.addWidget(self.fat_label, 3, 0)
-
-        self.carbohydrates_label = Label('perc carbohydrates')
-        self.grid_1.addWidget(self.carbohydrates_label, 4, 0)
-
-        self.perc_total_label = Label('0 %')
+        self.perc_total_label = Label('0')
         self.grid_1.addWidget(self.perc_total_label, 1, 1)
 
-        self.perc_protein_label = Label('0 %')
+        self.perc_protein_label = Label('0')
         self.grid_1.addWidget(self.perc_protein_label, 2, 1)
 
-        self.perc_fat_label = Label('0 %')
-        self.grid_1.addWidget(self.perc_fat_label, 3, 1)
-
-        self.perc_carbohydrates_label = Label('0 %')
-        self.grid_1.addWidget(self.perc_carbohydrates_label, 4, 1)
-
         self.frame_2 = QFrame(self)
-        self.frame_2.setMaximumHeight(150)
         self.grid.addWidget(self.frame_2, 1, 0)
         self.grid_2 = QGridLayout(self.frame_2)
 
-        self.close_button = PushButton('close window', self.close)
-        self.close_button.setMaximumWidth(250)
-        self.grid_2.addWidget(self.close_button, 5, 1)
+        # self.close_button = PushButton('close window', self.close)
+        # self.close_button.setMaximumWidth(250)
+        # self.grid_2.addWidget(self.close_button, 2, 0)
 
-        self.calculate_macros()
+        self.total_calories = 3000  # dodat calorie  i protein window
+        self.total_protein = 150
 
         [item.setMaximumWidth(250) for item in [item for item in self.children() if type(
             item) not in [QGridLayout, QFrame]] if item != self.main_label]
+
+        self.calculate_macros()
 
     def calculate_macros(self):
         try:
@@ -367,26 +345,44 @@ class Macros(QWidget):
                 f'SELECT * FROM "{d.formatted}"').fetchall()
 
             num_of_calories = sum([item[1] for item in daily_intake])
+            num_of_protein = sum(item[2] for item in daily_intake)
+
             if num_of_calories == 0:
                 return
-            total_calories = round(num_of_calories / 3000 * 100, 2)
-            self.perc_total_label.setText(f'{total_calories} %')
+
+            total_calories = round(
+                num_of_calories / self.total_calories * 100, 2)
+
+            self.perc_total_label.setText(
+                f'{num_of_calories} / {self.total_calories}, {total_calories} %')
+
+            self.perc_protein_label.setText(
+                f'{num_of_protein} / {self.total_protein}, {num_of_protein} %')
 
             num_of_protein = round(
                 sum([item[2] for item in daily_intake]) * 4 / num_of_calories * 100, 2)
-            self.perc_protein_label.setText(f'{num_of_protein} %')
 
             num_of_fat = round(
                 sum([item[3] for item in daily_intake]) * 9 / num_of_calories * 100, 2)
-            self.perc_fat_label.setText(f'{num_of_fat} %')
 
             num_of_carbohydrates = round(
                 sum([item[4] for item in daily_intake]) * 4 / num_of_calories * 100, 2)
-            self.perc_carbohydrates_label.setText(f'{num_of_carbohydrates} %')
+
+            self.macros = ['protein', 'fat', 'carbohydrate']
+            self.amounts = [num_of_protein, num_of_fat, num_of_carbohydrates]
+
+            self.make_graph()
+
         except OperationalError:
             msg = QMessageBox(QMessageBox.Warning,
                               'No table found', f'No table for {d.formatted}')
             msg.exec_()
+
+    def make_graph(self):
+
+        self.pie = MplCanvasPie(self, width=6, height=10, dpi=100)
+        self.pie.show_overview(amounts=self.amounts, assets=self.macros)
+        self.grid_2.addWidget(self.pie, 0, 0)
 
 
 class NewFood(QWidget):
@@ -476,81 +472,6 @@ class NewFood(QWidget):
         self.carbohydrates_edit.setText('')
 
 
-class LookUpWindow(QWidget):
-    def __init__(self):
-        super().__init__()
-        self.setGeometry(0, 0, 700, 700)
-        self.setWindowTitle('Look up Window')
-        self.setStyleSheet('background: #ffffff')
-
-        self.grid = QGridLayout(self)
-
-        self.frame_1 = QFrame(self)
-        self.grid.addWidget(self.frame_1)
-
-        self.grid_1 = QGridLayout(self.frame_1)
-
-        self.total_label = Label('calories')
-        self.grid_1.addWidget(self.total_label, 0, 0)
-
-        self.protein_label = Label('protein')
-        self.grid_1.addWidget(self.protein_label, 1, 0)
-
-        self.fat_label = Label('fat')
-        self.grid_1.addWidget(self.fat_label, 2, 0)
-
-        self.carbohydrates_label = Label('carbohydrates')
-        self.grid_1.addWidget(self.carbohydrates_label, 3, 0)
-
-        self.total_kcal_label = Label('0 g')
-        self.grid_1.addWidget(self.total_kcal_label, 0, 1)
-
-        self.protein_g_label = Label('0 g')
-        self.grid_1.addWidget(self.protein_g_label, 1, 1)
-
-        self.fat_g_label = Label('0 g')
-        self.grid_1.addWidget(self.fat_g_label, 2, 1)
-
-        self.carbohydrates_g_label = Label('0 g')
-        self.grid_1.addWikdget(self.carbohydrates_g_label, 3, 1)
-
-        self.name_edit = UserLineEdit(width=250)
-        self.grid_1.addWidget(self.name_edit, 4, 0)
-
-        self.close_button = QPushButton(
-            'search database', self.calculate_macros)
-        self.grid_1.addWidget(self.close_button, 4, 1)
-
-        self.frame_2 = QFrame(self)
-        self.frame_2.setMaximumHeight(150)
-        self.grid.addWidget(self.frame_2, 1, 0)
-        self.grid_2 = QGridLayout(self.frame_2)
-
-        self.close_button = PushButton('close window', self.close)
-        self.grid_2.addWidget(self.close_button, 5, 1)
-
-        [item.setMaximumWidth(250) for item in (
-            self.frame_1.children() + self.frame_2.children()) if type(item) != QGridLayout]
-
-    def calculate_macros(self):
-        food = self.name_edit.text()
-        macros = d.cursor.execute(
-            f'SELECT * FROM "Foods" WHERE food_name = "{food}"').fetchall()
-        if len(macros) == 0:
-            msg = QMessageBox(QMessageBox.Warning,
-                              'Food not found', 'Food not found')
-            msg.exec_()
-            return
-
-        self.total_kcal_label.setText(f'{macros[0][1]} kcal')
-
-        self.protein_g_label.setText(f'{macros[0][2]} g')
-
-        self.fat_g_label.setText(f'{macros[0][3]} g')
-
-        self.carbohydrates_g_label.setText(f'{macros[0][4]} g')
-
-
 class Label(QLabel):
     def __init__(self, text):
         super().__init__()
@@ -573,7 +494,7 @@ class PushButton(QPushButton):
         self.setText(text)
         self.setStyleSheet("*{border: 4px solid '#000000';" +
                            "border-radius: 45px;" +
-                           "font-size: 35px;" +
+                           "font-size: 30px;" +
                            "color: '#000000';" +
                            "background: '#08fff0';" +
                            "padding: 25px;}" +
@@ -597,6 +518,43 @@ class UserLineEdit(QLineEdit):
 
         if width:
             self.setMaximumWidth(width)
+
+
+class TextEdit(QLineEdit):
+    def keyPressEvent(self, event):
+        if event.key() == QtCore.Qt.Key_Backspace:
+            try:
+                d.new_window.select.edit.setText(
+                    d.new_window.select.edit.text()[:-1])
+                d.new_window.select.filter_foods()
+                d.new_window.select.show_buttons()
+            except IndexError:
+                pass
+        super(TextEdit, self).keyPressEvent(event)
+
+
+class MplCanvasPie(FigureCanvasQTAgg):
+    def __init__(self, parent=None, width=5, height=4, dpi=100):
+        fig = Figure(figsize=(width, height), dpi=dpi)
+        self.axes = fig.add_subplot(111)
+        super(MplCanvasPie, self).__init__(fig)
+
+    def show_overview(self, amounts, assets):
+        def func(pct, allvals):
+            absolute = int(np.round(pct/100.*np.sum(allvals)))
+            return "{:.1f}%\n".format(pct, absolute)
+
+        wedges, texts, autotexts = self.axes.pie(amounts, autopct=lambda pct: func(pct, amounts),
+                                                 textprops=dict(color="w"))
+
+        self.axes.legend(wedges, assets,
+                         title='Macros',
+                         loc="lower right",
+                         bbox_to_anchor=(0, 0, 0, 0))
+
+        plt.setp(autotexts, size=8, weight="bold")
+
+        self.axes.set_title(f'Macros distribution for today: ')
 
 
 if __name__ == '__main__':
