@@ -12,6 +12,8 @@ import matplotlib
 import numpy as np
 
 # dodat opciju za promjenit broj kcal
+# nastavit s radom, unijet protein goal i kcal goal u sql tablicu, povlacit iz tablice pri initialization
+
 # dodat opciju za remove food
 
 matplotlib.use('Qt5Agg')
@@ -125,17 +127,16 @@ class NewEntry(QWidget):
         self.carbohydrates_label = Label('total carbohydrates')
         self.grid_2.addWidget(self.carbohydrates_label, 4, 0)
 
-        self.gs = 'g'
         self.num_total_label = Label('0 kcal')
         self.grid_2.addWidget(self.num_total_label, 1, 1)
 
-        self.num_protein_label = Label(f'0 {self.gs}')
+        self.num_protein_label = Label('0 g')
         self.grid_2.addWidget(self.num_protein_label, 2, 1)
 
-        self.num_fat_label = Label('0 {self.gs}')
+        self.num_fat_label = Label('0 g')
         self.grid_2.addWidget(self.num_fat_label, 3, 1)
 
-        self.num_carbohydrates_label = Label(f'0 {self.gs}')
+        self.num_carbohydrates_label = Label('0 g')
         self.grid_2.addWidget(self.num_carbohydrates_label, 4, 1)
 
         try:
@@ -327,9 +328,17 @@ class Macros(QWidget):
         self.grid.addWidget(self.frame_2, 1, 0)
         self.grid_2 = QGridLayout(self.frame_2)
 
-        # self.close_button = PushButton('close window', self.close)
-        # self.close_button.setMaximumWidth(250)
-        # self.grid_2.addWidget(self.close_button, 2, 0)
+        self.frame_3 = QFrame(self)
+        self.grid.addWidget(self.frame_3, 2, 0)
+        self.grid_3 = QGridLayout(self.frame_3)
+
+        self.close_button = PushButton('close window', self.close)
+        self.close_button.setMaximumWidth(250)
+        self.grid_3.addWidget(self.close_button, 0, 0)
+
+        self.change_button = PushButton('Change values', self.change_values)
+        self.change_button.setMaximumWidth(250)
+        self.grid_3.addWidget(self.change_button, 0, 1)
 
         self.total_calories = 3000  # dodat calorie  i protein window
         self.total_protein = 150
@@ -371,18 +380,67 @@ class Macros(QWidget):
             self.macros = ['protein', 'fat', 'carbohydrate']
             self.amounts = [num_of_protein, num_of_fat, num_of_carbohydrates]
 
-            self.make_graph()
+            self.pie = MplCanvasPie(self, width=6, height=10, dpi=100)
+            self.pie.show_overview(amounts=self.amounts, assets=self.macros)
+            self.grid_2.addWidget(self.pie, 0, 0)
 
         except OperationalError:
             msg = QMessageBox(QMessageBox.Warning,
                               'No table found', f'No table for {d.formatted}')
             msg.exec_()
 
-    def make_graph(self):
+    def change_values(self):
 
-        self.pie = MplCanvasPie(self, width=6, height=10, dpi=100)
-        self.pie.show_overview(amounts=self.amounts, assets=self.macros)
-        self.grid_2.addWidget(self.pie, 0, 0)
+        self.change = ChangeWindow()
+        self.change.show()
+
+
+class ChangeWindow(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.setGeometry(0, 0, 700, 700)
+        self.setWindowTitle('Change caloric and protein goals window')
+        self.setStyleSheet('background: #ffffff')
+
+        self.grid = QGridLayout(self)
+        self.frame_1 = QFrame(self)
+        self.frame_2 = QFrame(self)
+
+        self.grid_1 = QGridLayout(self.frame_1)
+        self.grid_2 = QGridLayout(self.frame_2)
+
+        self.grid.addWidget(self.frame_1, 0, 0)
+        self.grid.addWidget(self.frame_2, 1, 0)
+
+        self.grid_1.addWidget(Label('Current calorie goal'), 0, 0)
+        self.total_kc = Label(str(d.new_window.total_calories))
+        self.grid_1.addWidget(self.total_kc, 0, 1)
+        self.grid_1.addWidget(Label('New calorie goal'), 1, 0)
+
+        self.kcal_edit = UserLineEdit()
+        self.grid_1.addWidget(self.kcal_edit, 1, 1)
+        self.kcal_button = PushButton('Change calories', self.change_calories)
+        self.grid_1.addWidget(self.kcal_button, 1, 2)
+
+        self.grid_2.addWidget(Label('Current protein goal'), 0, 0)
+        self.total_pr = Label(str(d.new_window.total_protein))
+        self.grid_2.addWidget(self.total_pr, 0, 1)
+        self.grid_2.addWidget(Label('New protein goal'), 1, 0)
+
+        self.prot_edit = UserLineEdit()
+        self.grid_2.addWidget(self.prot_edit, 1, 1)
+        self.prot_button = PushButton('Change protein', self.change_protein)
+        self.grid_2.addWidget(self.prot_button, 1, 2)
+
+    def change_calories(self):
+        self.total_kc = self.kcal_edit.text()
+        d.new_window.total_calories = int(self.kcal_edit.text())
+        d.new_window.calculate_macros()
+
+    def change_protein(self):
+        self.total_pr = self.prot_edit.text()
+        d.new_window.total_protein = int(self.prot_edit.text())
+        d.new_window.calculate_macros()
 
 
 class NewFood(QWidget):
