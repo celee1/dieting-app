@@ -11,9 +11,6 @@ import matplotlib.pyplot as plt
 import matplotlib
 import numpy as np
 
-# dodat opciju za promjenit broj kcal
-# nastavit s radom, unijet protein goal i kcal goal u sql tablicu, povlacit iz tablice pri initialization
-
 # dodat opciju za remove food
 
 matplotlib.use('Qt5Agg')
@@ -332,16 +329,18 @@ class Macros(QWidget):
         self.grid.addWidget(self.frame_3, 2, 0)
         self.grid_3 = QGridLayout(self.frame_3)
 
-        self.close_button = PushButton('close window', self.close)
-        self.close_button.setMaximumWidth(250)
-        self.grid_3.addWidget(self.close_button, 0, 0)
-
         self.change_button = PushButton('Change values', self.change_values)
         self.change_button.setMaximumWidth(250)
-        self.grid_3.addWidget(self.change_button, 0, 1)
+        self.grid_3.addWidget(self.change_button, 0, 0)
 
-        self.total_calories = 3000  # dodat calorie  i protein window
-        self.total_protein = 150
+        self.close_button = PushButton('close window', self.close)
+        self.close_button.setMaximumWidth(250)
+        self.grid_3.addWidget(self.close_button, 0, 1)
+
+        self.total_calories = int(d.cursor.execute(
+            'SELECT calorie_goal FROM goals').fetchall()[0][0])
+        self.total_protein = int(d.cursor.execute(
+            'SELECT protein_goal FROM goals').fetchall()[0][0])
 
         [item.setMaximumWidth(250) for item in [item for item in self.children() if type(
             item) not in [QGridLayout, QFrame]] if item != self.main_label]
@@ -433,14 +432,22 @@ class ChangeWindow(QWidget):
         self.grid_2.addWidget(self.prot_button, 1, 2)
 
     def change_calories(self):
-        self.total_kc = self.kcal_edit.text()
+        self.total_kc.setText(self.kcal_edit.text())
+        d.cursor.execute(
+            f'UPDATE goals SET calorie_goal = "{self.kcal_edit.text()}"')
         d.new_window.total_calories = int(self.kcal_edit.text())
         d.new_window.calculate_macros()
+        self.kcal_edit.clear()
+        d.db.commit()
 
     def change_protein(self):
-        self.total_pr = self.prot_edit.text()
+        self.total_pr.setText(self.prot_edit.text())
+        d.cursor.execute(
+            f'UPDATE goals SET protein_goal = "{self.prot_edit.text()}"')
         d.new_window.total_protein = int(self.prot_edit.text())
         d.new_window.calculate_macros()
+        self.prot_edit.clear()
+        d.db.commit()
 
 
 class NewFood(QWidget):
