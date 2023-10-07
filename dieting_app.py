@@ -1,15 +1,15 @@
 from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QPushButton, QGridLayout, QWidget, QFrame, QLineEdit, QMessageBox
 from PyQt5.QtGui import QCursor
 from PyQt5 import QtCore
-from sqlite3 import IntegrityError, OperationalError
-import sqlite3
-from datetime import datetime
-import sys
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 import matplotlib
+from sqlite3 import IntegrityError, OperationalError
+from datetime import datetime
 import numpy as np
+import sqlite3
+import sys
 
 # dodat opciju za remove food
 
@@ -206,15 +206,20 @@ class NewEntry(QWidget):
 
     def remove_food(self):
 
-        d.cursor.execute(f'SELECT COUNT(*) from "{d.formatted}"')
-        n_of_rows = d.cursor.fetchall()[0][0]
+        self.remove = RemoveFood()
+        self.remove.show()
 
-        d.cursor.execute(
-            f'DELETE FROM "{d.formatted}" WHERE id={n_of_rows};')
-        d.db.commit()
+        if 0 == 1:
 
-        self.insert_data()
-        self.food_name_edit.setFocus()
+            d.cursor.execute(f'SELECT COUNT(*) from "{d.formatted}"')
+            n_of_rows = d.cursor.fetchall()[0][0]
+
+            d.cursor.execute(
+                f'DELETE FROM "{d.formatted}" WHERE id={n_of_rows};')
+            d.db.commit()
+
+            self.insert_data()
+            self.food_name_edit.setFocus()
 
     def clear_plan(self):
         try:
@@ -235,6 +240,58 @@ class NewEntry(QWidget):
         self.select.show()
 
 
+class RemoveFood(QWidget):
+    def __init__(self):
+        super().__init__()
+
+        self.setGeometry(0, 0, 800, 700)
+        self.setWindowTitle('Remove food window')
+        self.setStyleSheet('background: #ffffff')
+
+        self.grid = QGridLayout(self)
+
+        self.frame_1 = QFrame(self)
+        self.grid_1 = QGridLayout(self.frame_1)
+
+        self.grid.addWidget(self.frame_1, 0, 0)
+
+        self.frame_2 = QFrame(self)
+        self.grid_2 = QGridLayout(self.frame_2)
+
+        self.grid.addWidget(self.frame_2, 1, 0)
+
+        self.formatted = datetime.now().strftime("%Y-%m-%d")
+
+        self.today = d.cursor.execute(
+            f'SELECT * FROM "{d.formatted}"').fetchall()
+
+        self.buttons = []
+
+        self.row = 0
+        column = 0
+
+        for food in self.today:
+            button = PushButton(f'{food[0]}', self.delete_food)
+            button.setMaximumWidth(250)
+            self.buttons.append(button)
+            self.grid.addWidget(button, self.row, column)
+            column += 1
+            if column != 0:
+                if column % 5 == 0:
+                    self.row += 1
+                    column = 0
+
+    def delete_food(self):
+        text = self.sender().text()
+        self.sender().hide()
+
+        d.cursor.execute(
+            f'DELETE FROM "{d.formatted}" WHERE food_name = "{text}"')
+        d.db.commit()
+
+        d.new_window.insert_data()
+
+
 class SelectFood(QWidget):
     def __init__(self):
         super().__init__()
@@ -252,12 +309,8 @@ class SelectFood(QWidget):
         self.label = Label('Search for food: ')
         self.grid.addWidget(self.label, self.row + 1, 0)
 
-        self.edit = TextEdit(self)
-        self.edit.setStyleSheet("*{border: 4px solid '#000000';" +
-                                "border-radius: 45px;" +
-                                "font-size: 25px;" +
-                                "padding: 0 25px;" +
-                                "color: '#000000';}")
+        self.edit = TextEdit()
+
         self.edit.setFocus()
         self.edit.textEdited.connect(self.filter_foods)
         self.grid.addWidget(self.edit, self.row + 1, 1)
@@ -269,6 +322,7 @@ class SelectFood(QWidget):
         column = 0
         for food in foods:
             button = PushButton(f'{food}', self.add_text)
+            button.setMaximumWidth(250)
             self.buttons.append(button)
             self.grid.addWidget(button, self.row, column)
             column += 1
@@ -586,6 +640,14 @@ class UserLineEdit(QLineEdit):
 
 
 class TextEdit(QLineEdit):
+    def __init__(self):
+        super().__init__()
+        self.setStyleSheet("*{border: 4px solid '#000000';" +
+                           "border-radius: 45px;" +
+                           "font-size: 25px;" +
+                           "padding: 0 25px;" +
+                           "color: '#000000';}")
+
     def keyPressEvent(self, event):
         if event.key() == QtCore.Qt.Key_Backspace:
             try:
