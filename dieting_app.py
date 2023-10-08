@@ -11,8 +11,6 @@ import numpy as np
 import sqlite3
 import sys
 
-# dodat opciju za remove food
-
 matplotlib.use('Qt5Agg')
 
 
@@ -260,6 +258,10 @@ class RemoveFood(QWidget):
 
         self.grid.addWidget(self.frame_2, 1, 0)
 
+        self.close_button = PushButton('Close window', self.close)
+        self.close_button.setMaximumWidth(250)
+        self.grid_2.addWidget(self.close_button, 0, 0)
+
         self.formatted = datetime.now().strftime("%Y-%m-%d")
 
         self.today = d.cursor.execute(
@@ -274,7 +276,7 @@ class RemoveFood(QWidget):
             button = PushButton(f'{food[0]}', self.delete_food)
             button.setMaximumWidth(250)
             self.buttons.append(button)
-            self.grid.addWidget(button, self.row, column)
+            self.grid_1.addWidget(button, self.row, column)
             column += 1
             if column != 0:
                 if column % 5 == 0:
